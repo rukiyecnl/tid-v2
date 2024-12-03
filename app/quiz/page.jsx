@@ -120,11 +120,11 @@ export default function Home() {
       <Head>
         <script
           src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"
-          strategy="beforeInteractive"
+          defer
         ></script>
         <script
           src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"
-          strategy="beforeInteractive"
+          defer
         ></script>
       </Head>
       <div>
