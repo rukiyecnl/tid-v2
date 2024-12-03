@@ -49,4 +49,28 @@ li {
   font-size: 20px;
   font-weight: 400;
   line-height: 25px;
+  padding: 10px;
+  border-radius: 20px;
+}
+
+.home:hover, .quiz:hover {
+  background-color: #94C1EB7D;
+}
+
+.home-content {
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 18.75px;
+  padding-inline: 30px;
+  padding-block: 30px;
+  background-color: #fff;
+  border-radius: 60px;
+}
+
+.main {
+  margin-top: 50px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 60px;
 }
