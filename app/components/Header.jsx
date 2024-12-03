@@ -6,8 +6,8 @@ export default function Header() {
       <div><img src="./logo.png" alt="logo" /></div>
       <div>
         <ul className="nav-list">
-            <li><Link href="/">Anasayfa</Link></li>
-            <li><Link href="/quiz">Test</Link></li>
+            <li className="home"><Link href="/">Anasayfa</Link></li>
+            <li className="quiz"><Link href="/quiz">Test</Link></li>
         </ul>
       </div>
     </header>
