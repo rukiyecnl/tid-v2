@@ -74,3 +74,54 @@ li {
   align-items: center;
   gap: 60px;
 }
+
+/*  quiz  */
+.quiz-page-content {
+  width: 100%;
+  display: block;
+  /* flex-direction: column;
+  justify-content: center; */
+  /* align-items: center; */
+  /* gap: 10px; */
+  margin: 0 auto;
+  margin-top: 20px;
+  padding-inline: 150px;
+}
+.start-btn{
+  font-family: Lexend Peta;
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 50px;
+  padding-inline: 20px;
+  padding-block: 5px;
+  background-color: #9DC5FC;
+  border-radius: 20px;
+  border: none;
+  margin: 0 auto;
+  color: #E5F4FB;
+}
+
+.random-letter-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  /* gap: 200px; */
+}
+
+.webcam-bar {
+  text-align: center;
+}
+
+.check-btn , .continue-btn{
+  font-family: Lexend Peta;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 50px;
+  padding-inline: 5px;
+  /* padding-block: 5px; */
+  background-color: #9DC5FC;
+  border-radius: 20px;
+  border: none;
+  color: #E5F4FB;
+  /* margin: 0 auto; */
+}

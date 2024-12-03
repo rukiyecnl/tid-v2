@@ -10,15 +10,20 @@ export default function Home() {
   const webcamContainerRef = useRef(null);
   const labelContainerRef = useRef(null);
   const [classPrediction, setClassPrediction]= useState(null);
+  const [isClicked, setIsClicked] = useState(false);
   // let classPrediction;
 
   let model, webcam, maxPredictions;
-
-  const [result, setResult] = useState("");
+  const [count, setCount] = useState(0);
+  const [result, setResult] = useState(" ");
 
   const checkPrediction = () => {
     // classPrediction ve randomLetterRef.current.innerHTML karşılaştırması yapılıyor
-    setResult(classPrediction === randomLetterRef.current.innerHTML ? "Correct" : "Incorrect");
+    setResult(classPrediction === randomLetterRef.current.innerHTML ? "Doğru" : "Yanlış. Algılanan harf: " + classPrediction);  
+    setIsClicked(true);
+    if (result === "Doğru") {
+      setCount(count++);
+    }
   };
 
   const getRandomLetter = () => {
@@ -44,7 +49,7 @@ export default function Home() {
 
       // Webcam'i başlat
       const flip = true;
-      webcam = new tmImage.Webcam(200, 200, flip);
+      webcam = new tmImage.Webcam(800, 500, flip);
       await webcam.setup();
       await webcam.play();
       setTimeout(() => webcam.pause(), 5000);
@@ -80,6 +85,7 @@ export default function Home() {
           webcam.pause();
         }, 5000);
         randomLetterRef.current.innerHTML = getRandomLetter();
+        setIsClicked(false);
         setResult(" ");
       });
     }
@@ -102,7 +108,7 @@ export default function Home() {
       }
       // classPrediction = prediction[max].className;
       setClassPrediction(prediction[max].className);
-      labelContainerRef.current.innerHTML = prediction[max].className;
+      // labelContainerRef.current.innerHTML = "Algılanan Harf: " + prediction[max].className;
 
     }
 
@@ -128,22 +134,34 @@ export default function Home() {
           defer
         ></script>
       </Head>
-      <div>
-        <div>Teachable Machine Image Model</div>
-        <button type="button">Start</button>
+      <div className="quiz-page-content">
+        <div style={{textAlign:"center"}}>
+          <button type="button" className="start-btn">Start</button>
+        </div>
 
-        <div>
-          <h2>Rastgele bir harf: </h2>
-          <div ref={randomLetterRef}></div>
+        <div className="random-letter-bar">
+          <div style={{display:"flex", gap:"10px", alignItems:"center"}}>
+            <h2>İstenilen Harf: </h2>
+            <div ref={randomLetterRef}></div>
+          </div>
+
+          <div id="label-container" ref={labelContainerRef}></div>
+          <div>doğru sayısı: {count}</div>
         </div>
         
-        <div id="webcam-container" ref={webcamContainerRef}></div>
-        <div id="label-container" ref={labelContainerRef}></div>
-        <button onClick={checkPrediction}>Check Prediction</button>
-        <div id="result">sonuç : {result}</div>
-        <button type="button" id="continue-btn" ref={continueButtonRef}>
-          Continue
-        </button>
+        <div id="webcam-container" ref={webcamContainerRef} className="webcam-bar"> </div>
+        <div style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
+          {
+            isClicked ?
+            <div id="result">Sonuç : {result}</div> 
+            :
+            <button onClick={checkPrediction} className="check-btn">Kontrol et</button> 
+
+          }
+          <button type="button" id="continue-btn" ref={continueButtonRef} className="continue-btn">
+            Continue
+          </button>
+        </div>
       </div>
     </>
   );
