@@ -48,7 +48,7 @@ export default function Home() {
       ? setTrueCount((prevTrueCount) => prevTrueCount+1) 
       : setFalseCount((prevFalseCount) => {
         const newFalseCount = prevFalseCount + 1;
-        if (newFalseCount === 2) {
+        if (newFalseCount === 5) {
           getQuizResult();
           
         }
@@ -184,7 +184,8 @@ export default function Home() {
             {/* <button onClick={openModal}>Modal Aç</button> */}
             <Modal isOpen={isOpen} onClose={closeModal}>
               <h2>Modal Başlığı</h2>
-              <p>Burası modal içeriği.</p>
+              <p>doğru sayınız: {TrueCount}</p>
+              <p>yanlış sayınız: {FalseCount}</p>
               <button onClick={closeModal} ref={closeBtnRef}>Kapat</button>
             </Modal>
           </div>
