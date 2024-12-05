@@ -22,10 +22,14 @@ export default function Home() {
   const [FalseCount, setFalseCount] = useState(0);
   const [result, setResult] = useState(" ");
   const[isFinished, setIsFinished] = useState(false);
+  const [timeCount, setTimeCount] = useState(5);
 
   const [isOpen, setIsOpen] = useState(false);
+  const [isStarted, setIsStarted] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(true);
 
   const openModal = () => setIsOpen(true);
+  const [no, setNo] = useState(1);
 
   const closeModal = async () => {
     setIsOpen(false); // Modal'ı kapat
@@ -40,29 +44,34 @@ export default function Home() {
   
   const [showContent, setShowContent] = useState(false);
   const checkPrediction = () => {
+    
     // classPrediction ve randomLetterRef.current.innerHTML karşılaştırması yapılıyor
-    setResult(classPrediction === randomLetterRef.current.innerHTML ? "Doğru" : "Yanlış. Algılanan harf: " + classPrediction);  
+    setResult(classPrediction === randomLetterRef.current.innerHTML ? (<span style={{color:"green"}}>Doğru</span>) : (<span style={{color:"red"}}>Yanlış</span>) );  
     setIsClicked(true);
 
     classPrediction === randomLetterRef.current.innerHTML 
       ? setTrueCount((prevTrueCount) => prevTrueCount+1) 
       : setFalseCount((prevFalseCount) => {
         const newFalseCount = prevFalseCount + 1;
-        if (newFalseCount === 5) {
-          getQuizResult();
-          
-        }
         return newFalseCount;
       });;
   
+      if(TrueCount + FalseCount === 9){
+        getQuizResult();
+      }
+      setIsDisabled(false);
   };
 
   const getQuizResult = () => {
-
-    setIsOpen(true);
-    setShowContent(true);  
+ 
+      setIsOpen(true);
+      setShowContent(true);  
+      setNo(1);
+    
 
   };
+
+
 
   const getRandomLetter = () => {
     const alphabet = "ABCDEFGHIJKLMNOPRSTUVYZ";
@@ -72,6 +81,7 @@ export default function Home() {
 
     
     useEffect(() => {
+      
       const URL = "https://teachablemachine.withgoogle.com/models/WHwMp8Ku-/";
   
       async function init() {
@@ -88,12 +98,10 @@ export default function Home() {
         webcam = new tmImage.Webcam(800, 500, flip);
         console.log(typeof webcam);
         
-        
         await webcam.setup();
         await webcam.play();
         setTimeout(() => webcam.pause(), 5000);
         window.requestAnimationFrame(loop);
-  
         // Kamerayı ve etiketleri DOM'a ekle
         webcamContainerRef.current.innerHTML = "";  
         webcamContainerRef.current.appendChild(webcam.canvas);
@@ -121,6 +129,7 @@ export default function Home() {
   
       function getContinueButton() {
         continueButtonRef.current.addEventListener("click", async () => {
+          setNo((prevNo) => prevNo + 1);
           await webcam.play();
           setTimeout(() => {
             webcam.pause();
@@ -128,6 +137,7 @@ export default function Home() {
           randomLetterRef.current.innerHTML = getRandomLetter();
           setIsClicked(false);
           setResult(" ");
+          setIsDisabled(true);
         });
       }
   
@@ -161,6 +171,20 @@ export default function Home() {
         }
       };
     }, [isOpen == false]);
+
+    // useEffect(() => {
+    //   if (timeCount === 0) {
+    //     // Zaman dolunca otomatik olarak devam düğmesine tıklamayı tetikle
+    //     setTimeCount(5); // Yeni soru için sayaç sıfırla
+    //   }
+    
+    //   const timer = setInterval(() => {
+    //     setTimeCount((prevTime) => (prevTime > 0 ? prevTime - 1 : 0));
+    //   }, 1000);
+    
+    //   return () => clearInterval(timer); // Temizlik yap
+    // }, [timeCount]);
+    
   
 
 
@@ -183,31 +207,40 @@ export default function Home() {
           <div>
             {/* <button onClick={openModal}>Modal Aç</button> */}
             <Modal isOpen={isOpen} onClose={closeModal}>
-              <h2>Modal Başlığı</h2>
-              <p>doğru sayınız: {TrueCount}</p>
-              <p>yanlış sayınız: {FalseCount}</p>
-              <button onClick={closeModal} ref={closeBtnRef}>Kapat</button>
+              <h2>Test Sonucu</h2>
+              <p className="true-count">doğru sayınız: {TrueCount}</p>
+              <p className="false-count">yanlış sayınız: {FalseCount}</p>
+              <button onClick={closeModal} ref={closeBtnRef} className="close-btn">Kapat</button>
             </Modal>
           </div>
         ) 
           
         }
         <div style={{textAlign:"center"}}>
-              <button type="button" className="start-btn">Start</button>
+              <button type="button" className="start-btn" onClick={() => setIsStarted(true)}>Start</button>
             </div>
 
             <div className="random-letter-bar">
               <div style={{display:"flex", gap:"10px", alignItems:"center"}}>
-                <h2>İstenilen Harf: </h2>
-                <div ref={randomLetterRef}></div>
+                
+                <h2 className="requested-letter-bar">İstenilen Harf: </h2>
+                <div className="requested-letter" ref={randomLetterRef}></div>
               </div>
 
               <div id="label-container" ref={labelContainerRef}></div>
-              <div>doğru sayısı: {TrueCount}</div>
-              <div ref={FalseCountref}>yanlış sayısı: {FalseCount}</div>
+              <div className="true-false-bar">
+                <div className="trueBar"><img src="./check.png" alt="check" /><p>: {TrueCount}</p> </div>
+                <div className="falseBar" ref={FalseCountref}><img src="./false.png" alt="false" /> <p>: {FalseCount}</p></div>
+
+              </div>
+            </div>
+
+            <div style={{position:"relative"}}>
+              <div className="letter-no">Harf : {no}</div>
+              <div id="webcam-container" ref={webcamContainerRef} className="webcam-bar"> </div>
+
             </div>
             
-            <div id="webcam-container" ref={webcamContainerRef} className="webcam-bar"> </div>
             <div style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
               {
                 isClicked ?
@@ -216,7 +249,13 @@ export default function Home() {
                 <button onClick={checkPrediction} className="check-btn">Kontrol et</button> 
 
               }
-              <button type="button" id="continue-btn" ref={continueButtonRef} className="continue-btn">
+              <div>Algılanan harf : {classPrediction}</div>
+              <button type="button" id="continue-btn" ref={continueButtonRef} className="continue-btn" disabled={isDisabled} 
+                        style={{
+                          backgroundColor: isDisabled && "#ccc",
+                          color: isDisabled && "#666",
+                          cursor: isDisabled ? "not-allowed" : "pointer",
+                        }}>
                 Continue
               </button>
             </div>

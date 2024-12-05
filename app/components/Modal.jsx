@@ -17,13 +17,7 @@ export default function Modal({ isOpen, onClose, children }) {
       }}
     >
       <div
-        style={{
-          backgroundColor: 'white',
-          padding: '20px',
-          borderRadius: '5px',
-          position: 'relative',
-          width: '400px',
-        }}
+        className="modal"
       >
         <button
           onClick={onClose}

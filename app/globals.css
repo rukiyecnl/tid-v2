@@ -4,7 +4,6 @@ body {
   max-width: 100%;
   background-color: #94C1EB7D;
   font-family: "Lexend Zetta", sans-serif;
-  font-style: normal;
 }
 
 * {
@@ -112,7 +111,7 @@ li {
   text-align: center;
 }
 
-.check-btn , .continue-btn{
+.check-btn , .continue-btn, .close-btn{
   font-family: Lexend Peta;
   font-size: 20px;
   font-weight: 600;
@@ -124,4 +123,55 @@ li {
   border: none;
   color: #E5F4FB;
   /* margin: 0 auto; */
+}
+
+.modal {
+  width: 300px;
+  height: 200px;
+  background-color: #d7e7fd;
+  border-radius: 10px;
+  padding: 20px;
+
+}
+
+.trueBar, .falseBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  & > img {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+.true-false-bar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.requested-letter-bar, .requested-letter, .trueBar, .falseBar {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 25px;
+  font-weight: 500;
+
+}
+
+.letter-no {
+  position: absolute;
+  margin-top: 20px;
+  margin-left: 20px;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 20px;
+  font-weight: 600;
+  background-color: #94C1EB7D;
+  padding: 5px;
+  border-radius: 8px;
+}
+
+.true-count, .false-count{
+  margin-block: 3px;
+  font-size: 20px;
+
 }
