@@ -33,6 +33,7 @@ export default function Home() {
 
   const closeModal = async () => {
     setIsOpen(false); // Modal'ı kapat
+    setIsDisabled(true); // Devam düğmesini devre dışı bırak
     // await webcam.setup();
     // await webcam.play();
     
