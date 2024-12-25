@@ -270,7 +270,7 @@ export default function Home() {
         </div>
 
         <div style={{display: "flex", justifyContent: "center", alignItems: "center", marginBlock: "20px", gap: "20px"}}>
-          <div style={{display: "flex",gap:"10px", alignItems: "center", backgroundColor: "#9DC5FC" , padding: "10px", borderRadius: "10px", color: "#E5F4FB"}}>
+          <div style={{display: "flex",gap:"10px", alignItems: "center", backgroundColor: "#9DC5FC" , padding: "10px", borderRadius: "10px", color: "#E5F4FB", border: "2px solid #000"}}>
             <h2 className="requested-letter-bar">İstenilen Harf: </h2>
             <div className="requested-letter" ref={randomLetterRef}></div>
 
