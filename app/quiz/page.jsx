@@ -101,7 +101,7 @@ export default function Home() {
         
         await webcam.setup();
         await webcam.play();
-        setTimeout(() => webcam.pause(), 5000);
+        setTimeout(() => webcam.pause(), 10000);
         window.requestAnimationFrame(loop);
         // Kamerayı ve etiketleri DOM'a ekle
         webcamContainerRef.current.innerHTML = "";  
@@ -134,7 +134,7 @@ export default function Home() {
           await webcam.play();
           setTimeout(() => {
             webcam.pause();
-          }, 5000);
+          }, 10000);
           randomLetterRef.current.innerHTML = getRandomLetter();
           setIsClicked(false);
           setResult(" ");
@@ -236,7 +236,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div style={{position:"relative"}}>
+            <div style={{position:"relative", width:"800px", height:"500px"}}>
               <div className="letter-no">Harf : {no}</div>
               <div id="webcam-container" ref={webcamContainerRef} className="webcam-bar"> </div>
 
