@@ -66,6 +66,7 @@ li {
   border-radius: 60px;
 }
 
+
 .main {
   margin-top: 50px;
   display: flex;
@@ -83,8 +84,8 @@ li {
   /* align-items: center; */
   /* gap: 10px; */
   margin: 0 auto;
-  margin-top: 20px;
-  padding-inline: 150px;
+  padding-inline: 200px;
+  margin-block: 20px;
 }
 .start-btn{
   font-family: Lexend Peta;
@@ -101,10 +102,12 @@ li {
 }
 
 .random-letter-bar {
-  display: flex;
+  /* width: max-content; */
+  /* display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: center; */
   /* gap: 200px; */
+  margin-bottom: 10px;
 }
 
 .webcam-bar {
@@ -140,8 +143,8 @@ li {
   gap: 10px;
 
   & > img {
-    width: 30px;
-    height: 30px;
+    width: 50px;
+    height: 50px;
   }
 }
 
@@ -149,11 +152,12 @@ li {
   display: flex;
   align-items: center;
   gap: 20px;
+  justify-content: space-between;
 }
 
 .requested-letter-bar, .requested-letter, .trueBar, .falseBar {
   font-family: 'Times New Roman', Times, serif;
-  font-size: 25px;
+  font-size: 30px;
   font-weight: 500;
 
 }
@@ -174,4 +178,34 @@ li {
   margin-block: 3px;
   font-size: 20px;
 
+}
+
+.requested-letter{
+  font-size: 50px;
+  font-weight: 700;
+  background-color: #000;
+  padding-inline: 6px;
+  border-radius: 5px;
+  border: 2px solid #73abf9;
+}
+
+.timer {
+  font-size: 30px;
+  font-weight: 600;
+}
+
+.predicted-letter {
+  font-size: 30px;
+  font-weight: 600;
+}
+
+
+.deneme{
+  display:"flex" !important;
+  gap:"10px";
+  align-items:"center";
+  justify-content:"center";
+  margin-block: 20px;
+  background-color: #94C1EB7D;
+  border-radius: 10px;
 }

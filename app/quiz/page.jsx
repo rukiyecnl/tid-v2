@@ -3,6 +3,7 @@ import Head from "next/head";
 import { useEffect, useRef, useState } from "react";
 import * as tmImage from "@teachablemachine/image";
 import Modal from "../components/Modal";
+import { log } from "@tensorflow/tfjs";
 
 export default function Home() {
   const randomLetterRef = useRef(null);
@@ -22,7 +23,7 @@ export default function Home() {
   const [FalseCount, setFalseCount] = useState(0);
   const [result, setResult] = useState(" ");
   const[isFinished, setIsFinished] = useState(false);
-  const [timeCount, setTimeCount] = useState(5);
+  const [timeCount, setTimeCount] = useState(10);
 
   const [isOpen, setIsOpen] = useState(false);
   const [isStarted, setIsStarted] = useState(false);
@@ -30,6 +31,7 @@ export default function Home() {
 
   const openModal = () => setIsOpen(true);
   const [no, setNo] = useState(1);
+  let newNo = 1;
 
   const closeModal = async () => {
     setIsOpen(false); // Modal'ı kapat
@@ -68,6 +70,8 @@ export default function Home() {
       setIsOpen(true);
       setShowContent(true);  
       setNo(1);
+      setTimeCount(10);
+      setIsStarted(false);
     
 
   };
@@ -89,24 +93,34 @@ export default function Home() {
         const modelURL = `${URL}model.json`;
         const metadataURL = `${URL}metadata.json`;
   
-        randomLetterRef.current.innerHTML = getRandomLetter();
+        // randomLetterRef.current.innerHTML = getRandomLetter();
   
         // Modeli yükle
         model = await tmImage.load(modelURL, metadataURL);
         maxPredictions = model.getTotalClasses();
         // Webcam'i başlat
         const flip = true;
-        webcam = new tmImage.Webcam(800, 500, flip);
+
+        webcam = new tmImage.Webcam(710, 450, flip);
         console.log(typeof webcam);
-        
-        await webcam.setup();
-        await webcam.play();
-        setTimeout(() => webcam.pause(), 10000);
+        if (isStarted) {
+          await webcam.setup();
+          await webcam.play();
+          window.requestAnimationFrame(loop);
+          setTimeout(() => webcam.pause(), 10000);
+
+          webcamContainerRef.current.innerHTML = "";  
+          webcamContainerRef.current.appendChild(webcam.canvas);
+          labelContainerRef.current.innerHTML = "";
+        }
+        // await webcam.setup();
+        // await webcam.play();
+        // setTimeout(() => webcam.pause(), 10000);
         window.requestAnimationFrame(loop);
         // Kamerayı ve etiketleri DOM'a ekle
-        webcamContainerRef.current.innerHTML = "";  
-        webcamContainerRef.current.appendChild(webcam.canvas);
-        labelContainerRef.current.innerHTML = "";
+        // webcamContainerRef.current.innerHTML = "";  
+        // webcamContainerRef.current.appendChild(webcam.canvas);
+        // labelContainerRef.current.innerHTML = "";
         for (let i = 0; i < maxPredictions; i++) {
           const div = document.createElement("div");
           labelContainerRef.current.appendChild(div);
@@ -116,21 +130,11 @@ export default function Home() {
         // closeModal(webcam);
       }
   
-      // const getContinueButton = async () => {
-      //   if (webcam) {
-      //     console.log("webcam", webcam);
-          
-      //     await webcam.play();
-      //     setTimeout(() => {
-      //       webcam.pause();
-      //     }, 5000);
-      //     randomLetterRef.current.innerHTML = getRandomLetter();
-      //   }
-      // };
-  
       function getContinueButton() {
         continueButtonRef.current.addEventListener("click", async () => {
-          setNo((prevNo) => prevNo + 1);
+          newNo = newNo + 1;
+          setNo(newNo);
+          setTimeCount(10);
           await webcam.play();
           setTimeout(() => {
             webcam.pause();
@@ -141,6 +145,7 @@ export default function Home() {
           setIsDisabled(true);
         });
       }
+
   
       async function loop() {
         webcam.update();
@@ -149,42 +154,85 @@ export default function Home() {
       }
   
       async function predict() {
-        const prediction = await model.predict(webcam.canvas);
-        let max = 0;
-        
-  
-        for (let i = 0; i < maxPredictions; i++) {
-          if (prediction[i].probability > prediction[max].probability) {
-            max = i;
+        if (isStarted) {
+          const prediction = await model.predict(webcam.canvas);
+          let max = 0;
+          
+    
+          for (let i = 0; i < maxPredictions; i++) {
+            if (prediction[i].probability > prediction[max].probability) {
+              max = i;
+            }
           }
+          // classPrediction = prediction[max].className;
+          setClassPrediction(prediction[max].className);
+          // labelContainerRef.current.innerHTML = "Algılanan Harf: " + prediction[max].className;
+          
         }
-        // classPrediction = prediction[max].className;
-        setClassPrediction(prediction[max].className);
-        // labelContainerRef.current.innerHTML = "Algılanan Harf: " + prediction[max].className;
   
       }
   
       init();
       return () => {
-        if (webcam) {
-          webcam.stop(); // Webcam'i durdur.
-          webcam = null; // Bellekte temizle.
+        if (isStarted) {
+          if (webcam) {
+            webcam.stop(); // Webcam'i durdur.
+            webcam = null; // Bellekte temizle.
+          }
+          
         }
       };
-    }, [isOpen == false]);
+    }, [isOpen == false, isStarted]);
 
-    // useEffect(() => {
-    //   if (timeCount === 0) {
-    //     // Zaman dolunca otomatik olarak devam düğmesine tıklamayı tetikle
-    //     setTimeCount(5); // Yeni soru için sayaç sıfırla
-    //   }
+    useEffect(() => {
+      let timer;
     
-    //   const timer = setInterval(() => {
-    //     setTimeCount((prevTime) => (prevTime > 0 ? prevTime - 1 : 0));
-    //   }, 1000);
+      if (isStarted) {
+        // Kamera başlat ve döngüyü çalıştır
+        (async () => {
+          await webcam.play();
+          window.requestAnimationFrame(loop);
+        })();
     
-    //   return () => clearInterval(timer); // Temizlik yap
-    // }, [timeCount]);
+        // Sayaç başlat
+        setTimeCount(10);
+        timer = setInterval(() => {
+          setTimeCount((prev) => {
+            if (prev <= 1) {
+              clearInterval(timer);
+              // webcam.pause(); // 10 saniye dolunca kamerayı durdur
+              // setIsDisabled(false); // Devam butonunu etkinleştir
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+      } else {
+        if (webcam) webcam.pause(); // Kamera durdur
+      }
+    
+      return () => {
+        clearInterval(timer);
+        // if (webcam) webcam.stop(); // Kamera tamamen durdur
+      };
+    }, [isStarted, no]);
+    
+    const handleStart = async () => {
+      setIsStarted(true); // Kamerayı başlat
+      randomLetterRef.current.innerHTML = getRandomLetter(); // Rastgele harf oluştur
+    };
+    
+    // const handleContinue = async () => {
+    //   setNo((prevNo) => prevNo + 1); // Soru numarasını artır
+    //   setTimeCount(10); // Sayaç sıfırla
+    //   await webcam.play(); // Kamerayı yeniden başlat
+    //   setTimeout(() => webcam.pause(), 10000); // 10 saniye sonra durdur
+    //   randomLetterRef.current.innerHTML = getRandomLetter(); // Yeni harf oluştur
+    //   setIsClicked(false);
+    //   setResult(" ");
+    //   setIsDisabled(true); // Devam butonunu devre dışı bırak
+    // };
+    
     
   
 
@@ -218,48 +266,55 @@ export default function Home() {
           
         }
         <div style={{textAlign:"center"}}>
-              <button type="button" className="start-btn" onClick={() => setIsStarted(true)}>Start</button>
+          <button type="button" className="start-btn" onClick={handleStart}>Başla</button>
+        </div>
+
+        <div style={{display: "flex", justifyContent: "center", alignItems: "center", marginBlock: "20px", gap: "20px"}}>
+          <div style={{display: "flex",gap:"10px", alignItems: "center", backgroundColor: "#9DC5FC" , padding: "10px", borderRadius: "10px", color: "#E5F4FB"}}>
+            <h2 className="requested-letter-bar">İstenilen Harf: </h2>
+            <div className="requested-letter" ref={randomLetterRef}></div>
+
+          </div>
+        </div>
+
+        <div className="random-letter-bar">
+
+
+          <div id="label-container" ref={labelContainerRef}></div>
+          <div className="true-false-bar">
+            <div className="trueBar"><img src="./check2.png" alt="check" /><p>: {TrueCount}</p> </div>
+            <div className="timer">
+              <h3>{timeCount}</h3>
             </div>
+            <div className="falseBar" ref={FalseCountref}><img src="./false2.png" alt="false" /> <p>: {FalseCount}</p></div>
 
-            <div className="random-letter-bar">
-              <div style={{display:"flex", gap:"10px", alignItems:"center"}}>
-                
-                <h2 className="requested-letter-bar">İstenilen Harf: </h2>
-                <div className="requested-letter" ref={randomLetterRef}></div>
-              </div>
+          </div>
+        </div>
 
-              <div id="label-container" ref={labelContainerRef}></div>
-              <div className="true-false-bar">
-                <div className="trueBar"><img src="./check.png" alt="check" /><p>: {TrueCount}</p> </div>
-                <div className="falseBar" ref={FalseCountref}><img src="./false.png" alt="false" /> <p>: {FalseCount}</p></div>
+        <div style={{position:"relative", width:"710px", height:"450px", backgroundColor:"#edf6fa", borderRadius:"10px"}}>
+          <div className="letter-no">Harf : {no}</div>
+          <div id="webcam-container" ref={webcamContainerRef} className="webcam-bar"> </div>
 
-              </div>
-            </div>
+        </div>
+        
+        <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginTop:"10px"}}>
+          {
+            isClicked ?
+            <div id="result">Sonuç : {result}</div> 
+            :
+            <button onClick={checkPrediction} className="check-btn">Kontrol et</button> 
 
-            <div style={{position:"relative", width:"800px", height:"500px"}}>
-              <div className="letter-no">Harf : {no}</div>
-              <div id="webcam-container" ref={webcamContainerRef} className="webcam-bar"> </div>
-
-            </div>
-            
-            <div style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
-              {
-                isClicked ?
-                <div id="result">Sonuç : {result}</div> 
-                :
-                <button onClick={checkPrediction} className="check-btn">Kontrol et</button> 
-
-              }
-              <div>Algılanan harf : {classPrediction}</div>
-              <button type="button" id="continue-btn" ref={continueButtonRef} className="continue-btn" disabled={isDisabled} 
-                        style={{
-                          backgroundColor: isDisabled && "#ccc",
-                          color: isDisabled && "#666",
-                          cursor: isDisabled ? "not-allowed" : "pointer",
-                        }}>
-                Continue
-              </button>
-            </div>
+          }
+          <div className="predicted-letter">Algılanan harf : {classPrediction}</div>
+          <button type="button" id="continue-btn" ref={continueButtonRef} className="continue-btn" disabled={isDisabled} 
+                    style={{
+                      backgroundColor: isDisabled && "#ccc",
+                      color: isDisabled && "#666",
+                      cursor: isDisabled ? "not-allowed" : "pointer",
+                    }}>
+            Devam et
+          </button>
+        </div>
 
       </div>
 
