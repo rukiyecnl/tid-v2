@@ -44,7 +44,7 @@ li {
   gap: 30px;
 }
 
-.home, .quiz {
+.home, .quiz, .customerService {
   font-size: 20px;
   font-weight: 400;
   line-height: 25px;
@@ -52,7 +52,7 @@ li {
   border-radius: 20px;
 }
 
-.home:hover, .quiz:hover {
+.home:hover, .quiz:hover, .customerService:hover {
   background-color: #94C1EB7D;
 }
 
