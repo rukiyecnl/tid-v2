@@ -47,22 +47,28 @@ export default function Home() {
   
   const [showContent, setShowContent] = useState(false);
   const checkPrediction = () => {
-    
-    // classPrediction ve randomLetterRef.current.innerHTML karşılaştırması yapılıyor
-    setResult(classPrediction === randomLetterRef.current.innerHTML ? (<span style={{color:"green"}}>Doğru</span>) : (<span style={{color:"red"}}>Yanlış</span>) );  
-    setIsClicked(true);
-
-    classPrediction === randomLetterRef.current.innerHTML 
-      ? setTrueCount((prevTrueCount) => prevTrueCount+1) 
-      : setFalseCount((prevFalseCount) => {
-        const newFalseCount = prevFalseCount + 1;
-        return newFalseCount;
-      });;
+    try {
+      setResult(() => {
+        return classPrediction === randomLetterRef.current?.innerHTML 
+          ? <span style={{ color: "green" }}>Doğru</span> 
+          : <span style={{ color: "red" }}>Yanlış</span>;
+      });
   
-      if(TrueCount + FalseCount === 9){
+      setIsClicked(true);
+  
+      if (classPrediction === randomLetterRef.current?.innerHTML) {
+        setTrueCount((prevTrueCount) => prevTrueCount + 1);
+      } else {
+        setFalseCount((prevFalseCount) => prevFalseCount + 1);
+      }
+  
+      if (TrueCount + FalseCount === 9) {
         getQuizResult();
       }
       setIsDisabled(false);
+    } catch (error) {
+      console.error("Tahmin kontrol hatası: ", error);
+    }
   };
 
   const getQuizResult = () => {
@@ -76,8 +82,6 @@ export default function Home() {
 
   };
 
-
-
   const getRandomLetter = () => {
     const alphabet = "ABCDEFGHIJKLMNOPRSTUVYZ";
     const randomIndex = Math.floor(Math.random() * alphabet.length);
@@ -85,141 +89,95 @@ export default function Home() {
   };
 
     
-    useEffect(() => {
-      
-      const URL = "https://teachablemachine.withgoogle.com/models/WHwMp8Ku-/";
+  useEffect(() => {
+    if (!isStarted) return;
   
-      async function init() {
-        const modelURL = `${URL}model.json`;
-        const metadataURL = `${URL}metadata.json`;
+    const URL = "https://teachablemachine.withgoogle.com/models/WHwMp8Ku-/";
+    let timer;
   
-        // randomLetterRef.current.innerHTML = getRandomLetter();
-  
-        // Modeli yükle
-        model = await tmImage.load(modelURL, metadataURL);
+    async function init() {
+      try {
+        model = await tmImage.load(`${URL}model.json`, `${URL}metadata.json`);
         maxPredictions = model.getTotalClasses();
-        // Webcam'i başlat
-        const flip = true;
-
-        webcam = new tmImage.Webcam(710, 450, flip);
-        console.log(typeof webcam);
-        if (isStarted) {
-          await webcam.setup();
-          await webcam.play();
-          window.requestAnimationFrame(loop);
-          setTimeout(() => webcam.pause(), 10000);
-
-          webcamContainerRef.current.innerHTML = "";  
-          webcamContainerRef.current.appendChild(webcam.canvas);
-          labelContainerRef.current.innerHTML = "";
-        }
-        // await webcam.setup();
-        // await webcam.play();
-        // setTimeout(() => webcam.pause(), 10000);
+  
+        webcam = new tmImage.Webcam(710, 450, true);
+        await webcam.setup();
+        await webcam.play();
         window.requestAnimationFrame(loop);
-        // Kamerayı ve etiketleri DOM'a ekle
-        // webcamContainerRef.current.innerHTML = "";  
-        // webcamContainerRef.current.appendChild(webcam.canvas);
-        // labelContainerRef.current.innerHTML = "";
-        for (let i = 0; i < maxPredictions; i++) {
-          const div = document.createElement("div");
-          labelContainerRef.current.appendChild(div);
-        }
   
-        getContinueButton();
-        // closeModal(webcam);
+        timer = setTimeout(() => {
+          webcam.pause();
+        }, 10000);
+      } catch (error) {
+        console.error("Model yükleme hatası: ", error);
       }
+    }
   
-      function getContinueButton() {
-        continueButtonRef.current.addEventListener("click", async () => {
-          newNo = newNo + 1;
-          setNo(newNo);
-          setTimeCount(10);
-          await webcam.play();
-          setTimeout(() => {
-            webcam.pause();
-          }, 10000);
-          randomLetterRef.current.innerHTML = getRandomLetter();
-          setIsClicked(false);
-          setResult(" ");
-          setIsDisabled(true);
-        });
-      }
-
-  
-      async function loop() {
-        webcam.update();
-        await predict();
-        window.requestAnimationFrame(loop);
-      }
-  
-      async function predict() {
-        if (isStarted) {
-          const prediction = await model.predict(webcam.canvas);
-          let max = 0;
-          
-    
-          for (let i = 0; i < maxPredictions; i++) {
-            if (prediction[i].probability > prediction[max].probability) {
-              max = i;
-            }
-          }
-          // classPrediction = prediction[max].className;
-          setClassPrediction(prediction[max].className);
-          // labelContainerRef.current.innerHTML = "Algılanan Harf: " + prediction[max].className;
-          
-        }
-  
-      }
-  
-      init();
-      return () => {
+    init();
+    return () => {
+      try {
         if (isStarted) {
           if (webcam) {
-            webcam.stop(); // Webcam'i durdur.
-            webcam = null; // Bellekte temizle.
+            webcam.stop();
+            webcam = null;
           }
-          
         }
-      };
-    }, [isOpen == false, isStarted]);
+      } catch (error) {
+        console.error("Webcam durdurma hatası: ", error);
+      }
+    };
+  }, [isOpen == false, isStarted]);
+  
 
-    useEffect(() => {
-      let timer;
-    
-      if (isStarted) {
-        // Kamera başlat ve döngüyü çalıştır
-        (async () => {
+  useEffect(() => {
+    let timer;
+  
+    if (isStarted) {
+      (async () => {
+        try {
           await webcam.play();
           window.requestAnimationFrame(loop);
-        })();
-    
-        // Sayaç başlat
-        setTimeCount(10);
-        timer = setInterval(() => {
-          setTimeCount((prev) => {
-            if (prev <= 1) {
-              clearInterval(timer);
-              // webcam.pause(); // 10 saniye dolunca kamerayı durdur
-              // setIsDisabled(false); // Devam butonunu etkinleştir
-              return 0;
-            }
-            return prev - 1;
-          });
-        }, 1000);
-      } else {
-        if (webcam) webcam.pause(); // Kamera durdur
+        } catch (error) {
+          console.error("Webcam oynatma hatası: ", error);
+        }
+      })();
+  
+      setTimeCount(10);
+      timer = setInterval(() => {
+        setTimeCount((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else {
+      try {
+        if (webcam) webcam.pause();
+      } catch (error) {
+        console.error("Webcam duraklatma hatası: ", error);
       }
-    
-      return () => {
+    }
+  
+    return () => {
+      try {
         clearInterval(timer);
-        // if (webcam) webcam.stop(); // Kamera tamamen durdur
-      };
-    }, [isStarted, no]);
+      } catch (error) {
+        console.error("Sayaç sıfırlama hatası: ", error);
+      }
+    };
+  }, [isStarted, no]);
     
     const handleStart = async () => {
-      setIsStarted(true); // Kamerayı başlat
-      randomLetterRef.current.innerHTML = getRandomLetter(); // Rastgele harf oluştur
+      try {
+        setIsStarted(true);
+        if (randomLetterRef.current) {
+          randomLetterRef.current.innerHTML = getRandomLetter();
+        }
+      } catch (error) {
+        console.error("Başlatma hatası: ", error);
+      }
     };
     
     // const handleContinue = async () => {
@@ -232,10 +190,6 @@ export default function Home() {
     //   setResult(" ");
     //   setIsDisabled(true); // Devam butonunu devre dışı bırak
     // };
-    
-    
-  
-
 
   return (
     <>

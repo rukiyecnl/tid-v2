@@ -21,7 +21,14 @@ export default function CustomerService() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            prompt: `${input}`,
+            prompt: `Uygulamada meydana gelen bir hata ile ilgili müşteri temsilcilerine açıklama yapabilmemiz için, fırlatılan exception’ı detaylıca analiz ederek nedenini açıklayan bir metin oluşturmanı istiyoruz. Lütfen aşağıdaki noktaları içeren bir açıklama yap:
+
+Hata Detayı: "${input}"
+Olası Nedenler: Bu hatanın ortaya çıkmasına sebep olabilecek durumları teknik ve anlaşılır şekilde belirt.
+Çözüm Önerileri: Hatanın nasıl düzeltilebileceğine dair teknik ekibe yönlendirebilecek çözüm yolları sun.
+Etkileri: Kullanıcı açısından bu hatanın nasıl bir sorun yaratabileceğini ve hangi senaryolarda ortaya çıkabileceğini açıkla.
+Örnek Senaryo: Müşteri temsilcilerinin durumu daha iyi anlaması için, hatanın nasıl meydana geldiğini anlatan basit ve anlaşılır bir örnek ver.
+Bu açıklama, teknik olmayan müşteri temsilcilerinin de hatayı anlamasını ve doğru bir şekilde iletmesini sağlayacak şekilde hazırlanmalıdır.`,
             max_tokens: 500,
             temperature: 0.7,
           }),
@@ -55,7 +62,7 @@ export default function CustomerService() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Sorunuzu yazın..."
+            placeholder="Hata mesajını buraya yazın..."
             style={{ padding: "10px", width: "300px" }}
             />
             <button type="submit" style={{ padding: "10px", marginLeft: "10px" }}>

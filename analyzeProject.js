@@ -32,7 +32,13 @@ async function analyzeFile(filePath) {
     });
 
     const data = await response.json();
-    return data.choices[0].text;
+    if (data.choices && data.choices.length > 0) {
+      return data.choices[0].text;
+    } else {
+      console.error(`No analysis result for ${filePath}`);
+      return "No analysis result.";
+    }
+    
   } catch (error) {
     console.error(`Error analyzing file ${filePath}:`, error);
     return null;
