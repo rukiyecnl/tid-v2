@@ -48,20 +48,14 @@ export default function Home() {
   const [showContent, setShowContent] = useState(false);
   const checkPrediction = () => {
     try {
-      setResult(() => {
-        return classPrediction === randomLetterRef.current?.innerHTML 
-          ? <span style={{ color: "green" }}>Doğru</span> 
-          : <span style={{ color: "red" }}>Yanlış</span>;
-      });
-  
+      setResult(classPrediction === randomLetterRef.current.innerHTML ? (<span style={{color:"green"}}>Doğru</span>) : (<span style={{color:"red"}}>Yanlış</span>) );  
       setIsClicked(true);
-  
-      if (classPrediction === randomLetterRef.current?.innerHTML) {
-        setTrueCount((prevTrueCount) => prevTrueCount + 1);
-      } else {
-        setFalseCount((prevFalseCount) => prevFalseCount + 1);
-      }
-  
+      classPrediction === randomLetterRef.current.innerHTML 
+        ? setTrueCount((prevTrueCount) => prevTrueCount+1) 
+        : setFalseCount((prevFalseCount) => {
+          const newFalseCount = prevFalseCount + 1;
+          return newFalseCount;
+        });;
       if (TrueCount + FalseCount === 9) {
         getQuizResult();
       }
@@ -96,21 +90,83 @@ export default function Home() {
     let timer;
   
     async function init() {
-      try {
-        model = await tmImage.load(`${URL}model.json`, `${URL}metadata.json`);
-        maxPredictions = model.getTotalClasses();
-  
-        webcam = new tmImage.Webcam(710, 450, true);
+      const modelURL = `${URL}model.json`;
+      const metadataURL = `${URL}metadata.json`;
+
+      // randomLetterRef.current.innerHTML = getRandomLetter();
+
+      // Modeli yükle
+      model = await tmImage.load(modelURL, metadataURL);
+      maxPredictions = model.getTotalClasses();
+      // Webcam'i başlat
+      const flip = true;
+      webcam = new tmImage.Webcam(710, 450, flip);
+      console.log(typeof webcam);
+      if (isStarted) {
         await webcam.setup();
         await webcam.play();
         window.requestAnimationFrame(loop);
-  
-        timer = setTimeout(() => {
+        setTimeout(() => webcam.pause(), 10000);
+        webcamContainerRef.current.innerHTML = "";  
+        webcamContainerRef.current.appendChild(webcam.canvas);
+        labelContainerRef.current.innerHTML = "";
+      }
+      // await webcam.setup();
+      // await webcam.play();
+      // setTimeout(() => webcam.pause(), 10000);
+      window.requestAnimationFrame(loop);
+      // Kamerayı ve etiketleri DOM'a ekle
+      // webcamContainerRef.current.innerHTML = "";  
+      // webcamContainerRef.current.appendChild(webcam.canvas);
+      // labelContainerRef.current.innerHTML = "";
+      for (let i = 0; i < maxPredictions; i++) {
+        const div = document.createElement("div");
+        labelContainerRef.current.appendChild(div);
+      }
+
+      getContinueButton();
+      // closeModal(webcam);
+    }
+
+    function getContinueButton() {
+      continueButtonRef.current.addEventListener("click", async () => {
+        newNo = newNo + 1;
+        setNo(newNo);
+        setTimeCount(10);
+        await webcam.play();
+        setTimeout(() => {
           webcam.pause();
         }, 10000);
-      } catch (error) {
-        console.error("Model yükleme hatası: ", error);
+        randomLetterRef.current.innerHTML = getRandomLetter();
+        setIsClicked(false);
+        setResult(" ");
+        setIsDisabled(true);
+      });
+    }
+
+    async function loop() {
+      webcam.update();
+      await predict();
+      window.requestAnimationFrame(loop);
+    }
+
+    async function predict() {
+      if (isStarted) {
+        const prediction = await model.predict(webcam.canvas);
+        let max = 0;
+        
+  
+        for (let i = 0; i < maxPredictions; i++) {
+          if (prediction[i].probability > prediction[max].probability) {
+            max = i;
+          }
+        }
+        // classPrediction = prediction[max].className;
+        setClassPrediction(prediction[max].className);
+        // labelContainerRef.current.innerHTML = "Algılanan Harf: " + prediction[max].className;
+        
       }
+
     }
   
     init();
