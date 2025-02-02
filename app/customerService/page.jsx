@@ -44,7 +44,7 @@ Lütfen aşağıdaki noktaları içeren bir açıklama yap, hepsi için 3 cümle
         console.log(parts[1]);
         setResponse(parts[1]);
         // const data = await res.json();
-        setResponse(data.choices[0].text);
+        // setResponse(data.choices[0].text);
         setLoading(false);
         return data.choices[0].text;
       } catch (error) {
@@ -62,27 +62,31 @@ Lütfen aşağıdaki noktaları içeren bir açıklama yap, hepsi için 3 cümle
 
   return (
     <div className="container">
-    <div className="main">
-        <div style={{ textAlign: "center", marginTop: "50px" }}>
-        <h1>Deepseek R1 Chat</h1>
-        <form onSubmit={handleSubmit}>
-            <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Hata mesajını buraya yazın..."
-            style={{ padding: "10px", width: "300px" }}
-            />
-            <button type="submit" style={{ padding: "10px", marginLeft: "10px" }}>
-            Gönder
-            </button>
-        </form>
-        {loading && <p>Yanıt alınıyor...</p>}
-        {response && (
-            <p style={{ marginTop: "20px", fontWeight: "bold" }}>{response}</p>
-        )}
-        </div>
-        </div>
+      <div className="main-customer-service">
+          <div className="customer-service">
+            <h1 className="customer-head">Deepseek R1 Chat</h1>
+            <div className="customer-service-form">
+              <form onSubmit={handleSubmit} className="customer-service-form-inner">
+                  <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Hata mesajını buraya yazın..."
+                  className="customer-service-input"
+                  />
+                  <button type="submit" className="customer-service-button">
+                  Gönder
+                  </button>
+              </form>
+            </div>
+            {loading && <p >Yanıt alınıyor...</p>}
+            {response && (
+                <div className="customer-service-response">{response.split("\n").map((line, index) => (
+                  <p key={index} >{line}</p>
+              ))}</div>
+            )}
+          </div>
+      </div>
     </div>
   );
 }

@@ -209,3 +209,76 @@ li {
   background-color: #94C1EB7D;
   border-radius: 10px;
 }
+
+
+/* customer service */
+.main-customer-service{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.customer-service {
+  margin-top: 50px !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 40px;
+  margin-block: 20px;
+}
+
+.customer-head {
+  text-align: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 37.5px;
+  letter-spacing: 1.2px;
+}
+
+.customer-service-form {
+  /* display: flex;
+  justify-content: space-between;
+  align-items: center; */
+}
+
+.customer-service-input {
+  width: 500px;
+  padding: 15px;
+  font-size: 18px;
+  border-radius: 10px;
+  border: none;
+  box-shadow: 5px 8px 25px #b8b7b7;
+}
+
+.customer-service-form-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.customer-service-button {
+  font-size: 20px;
+  /* font-weight: 600; */
+  line-height: 50px;
+  padding-inline: 5px;
+  /* padding-block: 5px; */
+  background-color: #9DC5FC;
+  border-radius: 20px;
+  border: none;
+  color: #E5F4FB;
+  cursor: pointer;
+}
+
+.customer-service-response {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  white-space: pre-line;
+
+  & > p {
+    margin-bottom:15px ;
+  }
+}
