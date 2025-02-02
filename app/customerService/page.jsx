@@ -21,20 +21,28 @@ export default function CustomerService() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            prompt: `Uygulamada meydana gelen bir hata ile ilgili müşteri temsilcilerine açıklama yapabilmemiz için, fırlatılan exception’ı detaylıca analiz ederek nedenini açıklayan bir metin oluşturmanı istiyoruz. Lütfen aşağıdaki noktaları içeren bir açıklama yap:
+            prompt: `Uygulamada meydana gelen bir hata ile ilgili müşteri temsilcilerine açıklama yapabilmemiz için, fırlatılan exception’ı detaylıca analiz ederek nedenini açıklayan bir metin oluşturmanı istiyoruz.  
 
-Hata Detayı: "${input}"
-Olası Nedenler: Bu hatanın ortaya çıkmasına sebep olabilecek durumları teknik ve anlaşılır şekilde belirt.
-Çözüm Önerileri: Hatanın nasıl düzeltilebileceğine dair teknik ekibe yönlendirebilecek çözüm yolları sun.
-Etkileri: Kullanıcı açısından bu hatanın nasıl bir sorun yaratabileceğini ve hangi senaryolarda ortaya çıkabileceğini açıkla.
-Örnek Senaryo: Müşteri temsilcilerinin durumu daha iyi anlaması için, hatanın nasıl meydana geldiğini anlatan basit ve anlaşılır bir örnek ver.
-Bu açıklama, teknik olmayan müşteri temsilcilerinin de hatayı anlamasını ve doğru bir şekilde iletmesini sağlayacak şekilde hazırlanmalıdır.`,
-            max_tokens: 500,
+Lütfen aşağıdaki noktaları içeren bir açıklama yap, hepsi için 3 cümleyi geçmemeye çalış:  
+
+- **Hata Detayı:** "${input}"  
+- **Olası Nedenler:** Bu hatanın ortaya çıkmasına sebep olabilecek durumları teknik ve anlaşılır şekilde belirt.  
+- **Çözüm Önerileri:** Hatanın nasıl düzeltilebileceğine dair teknik ekibe yönlendirebilecek çözüm yolları sun.  
+- **Etkileri:** Kullanıcı açısından bu hatanın nasıl bir sorun yaratabileceğini ve hangi senaryolarda ortaya çıkabileceğini açıkla.  
+- **Örnek Senaryo:** Müşteri temsilcilerinin durumu daha iyi anlaması için, hatanın nasıl meydana geldiğini anlatan basit ve anlaşılır bir örnek ver.  
+
+**Lütfen cevabını doğrudan ver, düşünme sürecini veya analiz notlarını yazma.**  
+`,
+            max_tokens: 1200,
             temperature: 0.7,
           }),
         });
     
         const data = await response.json();
+        // const data = await res.json();
+        const parts = data.choices[0].text.split("</think>");
+        console.log(parts[1]);
+        setResponse(parts[1]);
         // const data = await res.json();
         setResponse(data.choices[0].text);
         setLoading(false);

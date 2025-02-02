@@ -5,10 +5,9 @@ import fetch from "node-fetch";
 // __dirname'i ES6 modüllerinde kullanmak için
 import { fileURLToPath } from "url";
 import { dirname } from "path";
-import fs from 'fs';
+import fs from "fs";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
 
 // Proje dizini (kendi proje dizininizi belirtin)
 const PROJECT_DIR = path.join(__dirname, "app");
@@ -27,31 +26,44 @@ async function analyzeFile(filePath) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        prompt: `Yorumlamanızı istediğim aşağıdaki kodu değerlendirin. Lütfen kodun mimarisini, güvenliğini ve yazılım geliştirme best practice'lerine ne kadar uyduğunu detaylıca inceleyin. Aşağıdaki başlıklarda odaklanın:
+        prompt: `İncelemenizi istediğim aşağıdaki kodu değerlendirin ve aşağıdaki başlıklara göre detaylı bir teknik analiz sağlayın, olabilecek en kısa şekilde. Lütfen her başlık için ayrı bir inceleme yaparak, spesifik öneriler verin. Yüzeysel veya genel yorumlardan kaçının, doğrudan koddaki iyi ve eksik yönleri belirtin.
 
-1. **Mimari**:
-   - Kodun genel yapısı nasıl? Modülerlik ve katmanlı mimari kullanımı nasıl?
-   - Uygulama ile ilgili herhangi bir desen (design pattern) kullanılmış mı? Hangi desenler kullanılmışsa, bunlar doğru bir şekilde uygulanmış mı?
-
-2. **Güvenlik**:
-   - Kodda herhangi bir güvenlik açığı veya zayıf nokta var mı? (Örneğin, veri sızıntısı, kimlik doğrulama hataları, yetkilendirme eksiklikleri, SQL enjeksiyonu, vs.)
-   - Kullanıcı verilerinin güvenliğini sağlamak için alınan önlemler yeterli mi? Şifreleme, güvenli bağlantılar ve diğer güvenlik önlemleri nasıl?
-
-3. **Yazılım Best Practice'leri**:
-   - Kodun okunabilirliği nasıl? Değişken ve fonksiyon isimleri anlamlı ve tutarlı mı?
-   - Hata yönetimi (error handling) doğru bir şekilde yapılmış mı? 
-   - Kod tekrarı var mı? Kodda yeniden kullanılabilirlik için iyileştirme önerileri olabilir mi?
-   - Performans iyileştirmeleri yapılabilir mi? (Örneğin, gereksiz işlemler, bellek yönetimi, optimize edilmemiş döngüler vb.)
-   - Kodun test edilebilirliği nasıl? Test kapsamı yeterli mi?
+1. Mimari ve Kod Yapısı
+Kod modüler ve okunabilir mi? Fonksiyonlar, sınıflar ve bileşenler arasındaki ilişki mantıklı mı?
+Katmanlı mimari veya belirli bir design pattern kullanılmış mı? Kullanılmışsa doğru uygulanmış mı?
+Eğer modülerlik eksikse, kod nasıl daha iyi organize edilebilir?
+2. Güvenlik Analizi
+Veri güvenliği açısından açıklar var mı? (Örneğin: SQL injection, XSS, güvenli olmayan şifreleme, kimlik doğrulama hataları)
+Kullanıcı girişleri sanitize ediliyor mu?
+Şifreleme ve güvenli bağlantılar kullanılmış mı?
+3. Kod Kalitesi ve Best Practices
+Değişken ve fonksiyon isimlendirmeleri anlamlı ve tutarlı mı?
+Kod tekrarı (code duplication) var mı? Daha iyi bir yapı için refaktör önerileri sunun.
+Hata yönetimi (error handling) nasıl yapılmış? Eksik veya hatalı ise nasıl iyileştirilebilir?
+Bellek ve performans açısından optimizasyon yapılmış mı? Gereksiz işlemler veya kaynak tüketimi var mı?
+4. Test Edilebilirlik ve Bakım Kolaylığı
+Kodun test edilebilirliği ne durumda? (Bağımlılık enjeksiyonu, mock kullanımı gibi yöntemler var mı?)
+Birim testler ve entegrasyon testleri için uygun bir yapı var mı?
+Eğer testler eksikse, nasıl daha iyi hale getirilebilir?
 
 Aşağıda verilen kodu detaylıca inceleyip yukarıdaki kriterlere göre geri bildirimde bulunun.
 :\n${code}`,
-        max_tokens: 500,
-        temperature: 0.7,
+        temperature: 0.4,
+        max_tokens: 1500,
       }),
     });
 
-    const data = await response.json();
+    const data = await response.json(); // JSON formatına çevir
+    const responseText =
+      data.choices && data.choices.length > 0 ? data.choices[0].text : "";
+
+    // Eğer API yanıtında "Thoughts:" bölümü varsa onu ayır
+    const parts = responseText.includes("Thoughts:")
+      ? responseText.split("Thoughts:")[1].trim()
+      : responseText;
+
+    console.log(parts);
+
     if (data.choices && data.choices.length > 0) {
       return data.choices[0].text;
     } else {
@@ -98,8 +110,19 @@ async function analyzeProject(directory) {
 // Projeyi analiz et ve sonuçları kaydet
 analyzeProject(PROJECT_DIR)
   .then((results) => {
-    const outputPath = path.join(__dirname, "analysis_results.json");
-    writeFileSync(outputPath, JSON.stringify(results, null, 2));
+    const outputPath = path.join(__dirname, "analysis_results.txt"); // JSON yerine TXT kaydedeceğiz
+    let outputText = "";
+
+    results.forEach((result) => {
+      outputText += `Şu dosya okundu: ${result.filePath}\n`;
+      outputText += "--------------------------------------------\n";
+      outputText += result.analysis
+        ? result.analysis
+        : "Analiz sonucu bulunamadı.\n";
+      outputText += "\n\n"; // Her dosyanın analizini ayırmak için boşluk bırak
+    });
+
+    writeFileSync(outputPath, outputText, "utf-8");
     console.log(`Analysis results saved to ${outputPath}`);
   })
   .catch((error) => {
@@ -143,8 +166,7 @@ async function generateRoadmap() {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "gpt-4",
-      prompt: `Sen deneyimli bir yazılım geliştiricisin. Verilen proje kodlarını analiz ederek bir geliştirme yol haritası oluşturmalısın. Aşağıdaki proje kodlarını analiz ederek, mantıklı bir geliştirme yol haritası oluştur:
+      prompt: `Sen deneyimli bir yazılım geliştiricisin. Verilen proje kodlarını analiz ederek bir geliştirme yol haritası oluşturmalısın, olabilecek en kısa şekilde. Aşağıdaki proje kodlarını analiz ederek, mantıklı bir geliştirme yol haritası oluştur:
   ${allCode}
   
   Lütfen roadmap'i aşağıdaki formatta hazırla:
@@ -156,23 +178,32 @@ async function generateRoadmap() {
   
   Lütfen roadmap’i detaylı ve uygulanabilir şekilde oluştur!`,
       temperature: 0.7,
-      max_tokens: 1000,
+      max_tokens: 1500,
     }),
   });
-  
-  const data = await response.json(); // JSON formatında işle
-  
+
+  const data = await response.json(); // JSON formatına çevir
+  const responseText =
+    data.choices && data.choices.length > 0 ? data.choices[0].text : "";
+
+  // Eğer API yanıtında "Thoughts:" bölümü varsa onu ayır
+  const parts = responseText.includes("Thoughts:")
+    ? responseText.split("Thoughts:")[1].trim()
+    : responseText;
+
+  console.log(parts);
+  //setResponse(parts);
+
   if (!data.choices || data.choices.length === 0) {
     throw new Error("API yanıtı beklenilen formatta değil.");
   }
-  
+
   const roadmap = data.choices[0].text;
   fs.writeFileSync("roadmap.txt", roadmap, "utf-8");
-  
+
   console.log("=== AI TARAFINDAN OLUŞTURULAN ROADMAP ===");
   console.log(roadmap);
   console.log("\nRoadmap 'roadmap.txt' dosyasına kaydedildi! ✅");
-  
 }
 
 generateRoadmap();
